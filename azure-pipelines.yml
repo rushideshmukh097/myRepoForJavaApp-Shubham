@@ -1,22 +1,13 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
 - master
 
 variables:
-
   # Azure Resource Manager connection created during pipeline creation
   azureSubscription: '1ec5726a-b7e7-47a2-98e0-840e2d856e4b'
-
   # Web app name
   webAppName: 'AnkitDevpethWebsite'
-
   # Environment name
   environmentName: 'AnkitDevpethWebsite'
-
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
 
@@ -24,32 +15,27 @@ stages:
 - stage: Build
   displayName: Build stage
   jobs:
-  - job: MavenPackageAndPublishArtifacts
-    displayName: Maven Package and Publish Artifacts
+  - job: Build
+    displayName: 'Build job'
     pool:
       vmImage: $(vmImageName)
 
     steps:
-    - task: Maven@3
-      displayName: 'Maven Package'
+    - task: Gradle@2
       inputs:
-        mavenPomFile: 'MyWebApp/pom.xml'
-        goals: 'clean package'  # Specifying the Maven goals to execute
+        workingDirectory: ''
+        gradleWrapperFile: 'gradlew'
+        tasks: 'build'
 
     - task: CopyFiles@2
       displayName: 'Copy Files to artifact staging directory'
       inputs:
-        SourceFolder: '$(System.DefaultWorkingDirectory)'
-        Contents: '**/target/*.?(war|jar)'
+        SourceFolder: '$(System.DefaultWorkingDirectory)/build/libs'
+        Contents: '*.jar'
         TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish Artifact'
-      inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: 'drop'
-        publishLocation: 'Container'
-        artifact: drop
+    - upload: $(Build.ArtifactStagingDirectory)
+      artifact: drop
 
 - stage: Deploy
   displayName: Deploy stage
@@ -71,4 +57,4 @@ stages:
               azureSubscription: $(azureSubscription)
               appType: webAppLinux
               appName: $(webAppName)
-              package: '$(Pipeline.Workspace)/drop/**/target/*.?(war|jar)'
+              package: '$(Pipeline.Workspace)/drop/*.jar'
