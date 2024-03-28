@@ -1,0 +1,29 @@
+trigger:
+  branches:
+    include:
+      - main  # Modify this to match your branch name
+
+pool:
+  name: MyubuntuAgentPool  # Name of your self-hosted agent pool
+
+steps:
+- task: MavenAuthenticate@0
+  inputs:
+    MavenServiceConnections: '23391da9-5b2e-429e-9289-9e4398f731bc'  # Azure service connection ID
+    ConfigurationFile: 'pom.xml'  # Path to your Maven configuration file
+
+- checkout: self
+
+- task: Maven@3
+  inputs:
+    mavenPomFile: 'pom.xml'  # Path to your Maven configuration file
+    goals: 'package'  # Maven goals, you can customize this as needed
+
+- task: AzureWebApp@1
+  inputs:
+    azureSubscription: '23391da9-5b2e-429e-9289-9e4398f731bc'  # Azure service connection ID
+    appName: 'twoerror'  # Name of your Azure Web App
+    package: '$(System.DefaultWorkingDirectory)/target/*.war'  # Path to your Java application package
+    deployToSlotOrASE: false  # Set to true if you want to deploy to a slot or Azure App Service Environment
+    # Add any other deployment settings here
+
