@@ -18,7 +18,7 @@ variables:
   environmentName: 'twoerror'
 
   # Agent VM image name
-  vmImageName: MyubuntuAgentPool
+  vmImageName: 'MyubuntuAgentPool'
 
 stages:
 - stage: Build
