@@ -1,0 +1,36 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+pool:
+  vmImage: MyubuntuAgentPool
+
+steps:
+- task: UseJavaVersion@1
+  inputs:
+    versionSpec: '11'
+    addToPath: true
+
+- script: |
+    echo 'public class HelloWorld { public static void main(String[] args) { System.out.println("Hello, World!"); } }' > HelloWorld.java
+    javac HelloWorld.java
+  displayName: 'Compile Java'
+
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/app.zip'
+    replaceExistingArchive: true
+
+- task: AzureWebApp@1
+  inputs:
+    azureSubscription: '23391da9-5b2e-429e-9289-9e4398f731bc'  # Replace 'yourAzureSubscription' with the name of your Azure subscription
+    appName: 'twoerror'  # Name of your Azure Web App
+    package: '$(Build.ArtifactStagingDirectory)/app.zip'
+    deployToSlotOrASE: false
