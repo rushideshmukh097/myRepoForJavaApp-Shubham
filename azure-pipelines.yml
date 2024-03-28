@@ -7,7 +7,6 @@ trigger:
 - master
 
 variables:
-
   # Azure Resource Manager connection created during pipeline creation
   azureSubscription: '12407e03-b523-4319-bb14-0cf6773c4e75'
 
@@ -27,7 +26,7 @@ stages:
   - job: MavenPackageAndPublishArtifacts
     displayName: Maven Package and Publish Artifacts
     pool:
-      vmImage: $(vmImageName)
+      name: MyubuntuAgentPool
 
     steps:
     - task: Maven@3
@@ -37,6 +36,7 @@ stages:
 
     - task: CopyFiles@2
       displayName: 'Copy Files to artifact staging directory'
+
       inputs:
         SourceFolder: '$(System.DefaultWorkingDirectory)'
         Contents: '**/target/*.?(war|jar)'
@@ -54,7 +54,7 @@ stages:
     displayName: Deploy Linux Web App
     environment: $(environmentName)
     pool:
-      vmImage: $(vmImageName)
+      name: MyubuntuAgentPool
     strategy:
       runOnce:
         deploy:
